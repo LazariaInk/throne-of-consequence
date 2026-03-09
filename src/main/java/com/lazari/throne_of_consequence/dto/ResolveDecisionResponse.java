@@ -1,12 +1,12 @@
 package com.lazari.throne_of_consequence.dto;
 
-import com.lazari.throne_of_consequence.model.DecisionType;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record ResolveDecisionResponse(
-        String eventId,
-        DecisionType decision,
-        String narrative,
-        String aiReason,
-        ConsequenceDto consequence
+        @NotBlank String selectedOption,
+        @Valid @NotNull ConsequenceDto consequence
 ) {
 }

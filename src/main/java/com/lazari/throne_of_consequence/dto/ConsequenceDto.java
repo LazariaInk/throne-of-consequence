@@ -1,6 +1,7 @@
 package com.lazari.throne_of_consequence.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 public record ConsequenceDto(
         @NotBlank String title,

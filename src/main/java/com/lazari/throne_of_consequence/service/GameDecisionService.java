@@ -1,6 +1,5 @@
 package com.lazari.throne_of_consequence.service;
 
-
 import com.lazari.throne_of_consequence.dto.AiDecisionPayload;
 import com.lazari.throne_of_consequence.dto.ConsequenceDto;
 import com.lazari.throne_of_consequence.dto.ResolveDecisionRequest;
@@ -37,6 +36,7 @@ public class GameDecisionService {
         AiDecisionPayload ai = ollamaClient.classifyDecision(systemPrompt, userPrompt);
 
         DecisionType decision = normalize(ai.decision());
+
         ConsequenceDto selected = switch (decision) {
             case A -> request.optionA();
             case B -> request.optionB();
@@ -44,14 +44,19 @@ public class GameDecisionService {
         };
 
         String narrative = normalizeNarrative(ai.narrative(), decision);
-        String reason = normalizeReason(ai.reason(), decision);
+
+        ConsequenceDto finalConsequence = new ConsequenceDto(
+                selected.title(),
+                narrative,
+                selected.religion(),
+                selected.population(),
+                selected.army(),
+                selected.money()
+        );
 
         return new ResolveDecisionResponse(
-                request.event().id(),
-                decision,
-                narrative,
-                reason,
-                selected
+                decision.name(),
+                finalConsequence
         );
     }
 
@@ -68,18 +73,6 @@ public class GameDecisionService {
             case A -> "Regele inclina spre prima cale, iar curtea se supune poruncii sale.";
             case B -> "Regele alege a doua cale, iar sfetnicii isi pleaca fruntile.";
             case NONE -> "Regele graieste atat de ciudat incat sala amuteste. Pana si bufonul pare ingrijorat.";
-        };
-    }
-
-    private String normalizeReason(String reason, DecisionType decision) {
-        if (reason != null && !reason.isBlank()) {
-            return reason.strip();
-        }
-
-        return switch (decision) {
-            case A -> "Mesajul jucatorului se potriveste mai bine cu intentia optiunii A.";
-            case B -> "Mesajul jucatorului se potriveste mai bine cu intentia optiunii B.";
-            case NONE -> "Mesajul jucatorului este in afara contextului sau neclar.";
         };
     }
 }

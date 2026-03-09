@@ -9,6 +9,7 @@ public record ResolveDecisionRequest(
         @Valid @NotNull EventCardDto event,
         @Valid @NotNull ConsequenceDto optionA,
         @Valid @NotNull ConsequenceDto optionB,
+        @Valid @NotNull ConsequenceDto optionC,
         @NotBlank @Size(max = 400) String playerInput
 ) {
 }
