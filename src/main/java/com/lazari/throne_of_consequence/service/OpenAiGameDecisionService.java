@@ -1,5 +1,6 @@
 package com.lazari.throne_of_consequence.service;
 
+import com.lazari.throne_of_consequence.config.OpenAiClient;
 import com.lazari.throne_of_consequence.dto.AiDecisionPayload;
 import com.lazari.throne_of_consequence.dto.ConsequenceDto;
 import com.lazari.throne_of_consequence.dto.ResolveDecisionRequest;
@@ -8,13 +9,13 @@ import com.lazari.throne_of_consequence.model.DecisionType;
 import org.springframework.stereotype.Service;
 
 @Service
-public class GameDecisionService {
+public class OpenAiGameDecisionService {
 
-    private final OllamaClient ollamaClient;
+    private final OpenAiClient openAiClient;
     private final PromptFactory promptFactory;
 
-    public GameDecisionService(OllamaClient ollamaClient, PromptFactory promptFactory) {
-        this.ollamaClient = ollamaClient;
+    public OpenAiGameDecisionService(OpenAiClient openAiClient, PromptFactory promptFactory) {
+        this.openAiClient = openAiClient;
         this.promptFactory = promptFactory;
     }
 
@@ -28,7 +29,7 @@ public class GameDecisionService {
                 request.playerInput()
         );
 
-        AiDecisionPayload ai = ollamaClient.classifyDecision(systemPrompt, userPrompt);
+        AiDecisionPayload ai = openAiClient.classifyDecision(systemPrompt, userPrompt);
 
         DecisionType decision = normalize(ai != null ? ai.decision() : null);
 

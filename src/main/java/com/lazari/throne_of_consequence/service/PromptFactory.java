@@ -11,7 +11,13 @@ public class PromptFactory {
         return """
             You are a strict classifier for a medieval kingdom decision game.
 
-            You must return ONLY valid JSON.
+            Your job is NOT to invent a new decision.
+            Your job is ONLY to classify the player's message as:
+            - A
+            - B
+            - C
+
+            Return ONLY valid JSON.
             No markdown.
             No explanations outside JSON.
 
@@ -20,19 +26,27 @@ public class PromptFactory {
             or
             {"decision":"B","narrative":"...","reason":"..."}
             or
-            {"decision":"NONE","narrative":"...","reason":"..."}
+            {"decision":"C","narrative":"...","reason":"..."}
 
-            Rules:
-            1. Choose NONE for any off-topic, absurd, random, joking, trolling, modern unrelated or unclear input.
-            2. If unsure, choose NONE.
-            3. Only choose A if the player clearly supports option A.
-            4. Only choose B if the player clearly supports option B.
-            5. narrative must be in Romanian, short, medieval in tone.
-            6. reason must be in Romanian and short.
+            Classification rules:
+            1. Choose A only if the player clearly supports option A.
+            2. Choose B only if the player clearly supports option B.
+            3. Choose C if the message is unclear, ambiguous, contradictory, absurd, random, off-topic, trolling, modern-unrelated, or outside the context of the event.
+            4. If unsure, choose C.
+            5. Do not reward vague diplomacy unless it clearly matches A or B.
+            6. narrative must be in Romanian, short, medieval in tone.
+            7. reason must be in Romanian and short.
+            8. Never output anything except the JSON object.
             """;
     }
 
-    public String buildUserPrompt(EventCardDto event, ConsequenceDto optionA, ConsequenceDto optionB, String playerInput) {
+    public String buildUserPrompt(
+            EventCardDto event,
+            ConsequenceDto optionA,
+            ConsequenceDto optionB,
+            ConsequenceDto optionC,
+            String playerInput
+    ) {
         return """
                 Analizeaza raspunsul jucatorului pentru acest eveniment.
 
@@ -51,31 +65,46 @@ public class PromptFactory {
                 text: %s
                 efecte: religion=%+d, population=%+d, army=%+d, money=%+d
 
+                OPTIUNEA C
+                titlu: %s
+                text: %s
+                efecte: religion=%+d, population=%+d, army=%+d, money=%+d
+
                 MESAJUL JUCATORULUI
                 %s
 
                 Alege strict intentia jucatorului:
-                - A
-                - B
-                - NONE
+                - A = sustine clar prima directie
+                - B = sustine clar a doua directie
+                - C = raspuns neclar, ambiguu, in afara contextului, absurd sau fara legatura
 
-                Daca raspunsul este in afara contextului, random, absurd sau fara legatura cu evenimentul, alege NONE.
+                Daca raspunsul nu este clar aliniat cu A sau B, alege C.
                 """.formatted(
-                event.id(),
+                safe(event.id()),
                 safe(event.title()),
                 safe(event.description()),
+
                 safe(optionA.title()),
                 safe(optionA.text()),
                 optionA.religion(),
                 optionA.population(),
                 optionA.army(),
                 optionA.money(),
+
                 safe(optionB.title()),
                 safe(optionB.text()),
                 optionB.religion(),
                 optionB.population(),
                 optionB.army(),
                 optionB.money(),
+
+                safe(optionC.title()),
+                safe(optionC.text()),
+                optionC.religion(),
+                optionC.population(),
+                optionC.army(),
+                optionC.money(),
+
                 safe(playerInput)
         );
     }
